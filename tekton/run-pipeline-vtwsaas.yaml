@@ -14,7 +14,7 @@ spec:
     - name: maven-goal 
       value: "package"
     - name: image-name 
-      value: "docker.io/areumLee/vtwsaas"
+      value: "docker.io/chulsune123/vtwsaas"
     - name: image-tag 
       value: "latest" 
   workspaces:
@@ -31,4 +31,7 @@ spec:
         secretName: ssh-key-secret
     - name: docker-config 
       secret: 
-        secretName: regcred 
+        secretName: regcred
+        items:
+          - key: .dockerconfigjson
+            path: config.json

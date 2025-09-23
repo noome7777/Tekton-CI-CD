@@ -7,7 +7,7 @@ spec:
     name: build-and-push-image
   params:
     - name: image-name
-      value: "docker.io/gtno1chun/vtwsaas"
+      value: "docker.io/chulsune123/vtwsaas"
     - name: image-tag
       value: "test"
   workspaces:
