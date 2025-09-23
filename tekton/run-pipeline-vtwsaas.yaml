@@ -8,13 +8,13 @@ spec:
   serviceAccountName: tekton-sa 
   params:
     - name: repo-url
-      value: "git@github.com:gtno1chun/vtw-saas.git" 
+      value: "git@github.com:areumLee1360/vtw-saas.git"
     - name: branch-name
       value: "main"
     - name: maven-goal 
       value: "package"
     - name: image-name 
-      value: "docker.io/gtno1chun/vtwsaas" 
+      value: "docker.io/areumLee/vtwsaas"
     - name: image-tag 
       value: "latest" 
   workspaces:
