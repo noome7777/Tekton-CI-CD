@@ -1,0 +1,47 @@
+apiVersion: triggers.tekton.dev/v1beta1 
+kind: TriggerTemplate 
+metadata:
+  name: github-template 
+  namespace: default 
+spec: 
+  params: 
+    - name: repo-url 
+    - name: branch-name 
+    - name: commit-sha 
+  resourcetemplates: 
+    - apiVersion: tekton.dev/v1beta1 
+      kind: PipelineRun 
+      metadata: 
+        generateName: github-pipeline-run-
+      spec: 
+        pipelineRef: 
+          name: pipeline-vtwsaas-portal 
+        serviceAccountName: tekton-sa 
+        params: 
+          - name: repo-url 
+            value: $(tt.params.repo-url) 
+          - name: branch-name 
+            value: $(tt.params.branch-name) 
+          - name: commit-sha 
+            value: $(tt.params.commit-sha) 
+          - name: image-name
+            value: "docker.io/gtno1chun/vtwsaas"
+          - name: image-tag
+            value: "latest" 
+        workspaces: 
+          - name: shared-workspace 
+            volumeClaimTemplate: 
+              spec:
+                accessModes:
+                  - ReadWriteOnce 
+                resources: 
+                  requests: 
+                    storage: 1Gi 
+          - name: shared-ssh-dir 
+            secret: 
+              secretName: ssh-key-secret 
+          - name: docker-config 
+            secret:
+              secretName: regcred 
+              
+        

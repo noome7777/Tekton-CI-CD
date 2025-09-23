@@ -1,0 +1,49 @@
+# apiVersion: triggers.tekton.dev/v1beta1 
+# kind: EventListener 
+# metadata:
+#   name: github-listener 
+# spec: 
+#   serviceAccountName: tekton-triggers-sa    
+#   triggers:
+#     - name: github-push 
+#       interceptors:
+#         - ref: 
+#             name: github 
+#           params: 
+#             - name: secretRef 
+#               value: 
+#                 secretName: github-webhook-secret 
+#                 secretKey: secretToken 
+#             - name: eventTypes 
+#               value: ["push"] 
+#       bindings:
+#         - ref: github-binding 
+#       template:
+#         ref: github-template 
+
+apiVersion: triggers.tekton.dev/v1beta1 
+kind: EventListener 
+metadata: 
+  name: github-listener
+  namespace: default  
+spec: 
+  serviceAccountName: tekton-triggers-sa 
+  triggers:
+    - bindings: 
+        - ref: github-binding 
+      template:
+        ref: github-template 
+
+      # 로컬 테스트 일 경우 아래 임시 주석
+      interceptors: []
+      # interceptors: 
+      #   - ref: 
+      #       name: github 
+      #     params: 
+      #       - name: secretRef 
+      #         value: 
+      #           secretName: github-webhook-secret 
+      #           secretKey: secretToken 
+      #       - name: eventTypes 
+      #         value: 
+      #           - push 

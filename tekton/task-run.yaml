@@ -1,0 +1,24 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: kaniko-test-run
+spec:
+  taskRef:
+    name: build-and-push-image
+  params:
+    - name: image-name
+      value: "docker.io/gtno1chun/vtwsaas"
+    - name: image-tag
+      value: "test"
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-config
+      secret:
+        secretName: regcred

@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone-ssh
+spec:
+  params:
+    - name: repo-url
+      type: string
+      description: The URL of the git repository to clone (SSH format).
+    - name: branch-name
+      type: string
+      description: The git branch to checkout.
+      default: "main"
+  workspaces:
+    - name: source
+      description: The workspace where the cloned repository will be stored.
+    - name: ssh-dir 
+  steps:
+    - name: clone-repository
+      image: alpine/git:v2.49.1
+      script: |
+        #!/bin/sh
+
+        # 1. Create a writable directory for the SSH key
+        #    The root user's home directory is typically writable
+        mkdir -p /root/.ssh
+        
+        # 2. Copy the read-only key to the new, writable location
+        cp $(workspaces.ssh-dir.path)/ssh-key /root/.ssh/id_rsa
+        
+        # 3. Set the correct permissions on the copied key
+        chmod 600 /root/.ssh/id_rsa
+        
+        # 4. Configure SSH to use the new key
+        echo "StrictHostKeyChecking no" >> /root/.ssh/config
+        
+        # 5. Set GIT_SSH_COMMAND to use the correct key path
+        GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa"
+        
+        # 6. Perform the git clone
+        git clone "$(params.repo-url)" "$(workspaces.source.path)"
+
+        # 7. Change into the cloned directory and checkout the branch
+        cd "$(workspaces.source.path)"
+        git checkout "$(params.branch-name)" 

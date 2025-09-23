@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: maven-build 
+spec:
+  params:
+    - name: maven-goal
+      type: string 
+      description: The Maven goal to run 
+      default: "package"
+    - name: project-path 
+      type: string 
+      default: "gs-spring-boot/complete" 
+  workspaces: 
+    - name: source 
+      description: The workspace containing the source code. 
+
+      # /root/.m2는 goal이 아니라 volume mount 해야 합니다.
+    - name: maven-settings 
+      optional: true 
+  steps:
+    - name: run-maven 
+      image: maven:3.8-openjdk-17 
+      # image: maven:3.8.7-eclipse-temurin-17
+      workingDir: $(workspaces.source.path)
+      script: | 
+        #!/bin/bash
+        cd "$(workspaces.source.path)/$(params.project-path)"
+        ls -alF
+        # ./mvnw "$(params.maven-goal)"
+        mvn -B "$(params.maven-goal)"
+        
+         

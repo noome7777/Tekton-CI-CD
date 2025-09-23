@@ -1,0 +1,14 @@
+apiVersion: triggers.tekton.dev/v1beta1 
+kind: TriggerBinding 
+metadata: 
+  name: github-binding 
+  namespace: default 
+spec: 
+  params:
+    - name: repo-url  
+      value: $(body.repository.url) 
+    - name: branch-name 
+      value: $(body.ref) 
+    - name: commit-sha 
+      value: $(body.after) 
+ 

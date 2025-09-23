@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tekton-triggers-pipelinerun
+rules:
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns", "taskruns"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-triggers-pipelinerun-binding
+subjects:
+  - kind: ServiceAccount
+    name: tekton-triggers-sa
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: tekton-triggers-pipelinerun
+  apiGroup: rbac.authorization.k8s.io
