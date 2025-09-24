@@ -1,0 +1,61 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: tekton-pipelines-controller-monitor
+  namespace: tekton-pipelines # Tekton이 설치된 네임스페이스
+  labels:
+    release: prometheus # kube-prometheus-stack Helm 릴리스 이름
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/part-of: tekton-pipelines
+  namespaceSelector:
+    matchNames:
+      - tekton-pipelines # Tekton 컨트롤러가 있는 네임스페이스
+  endpoints:
+    - port: http-metrics # 실제 kubectl -n tekton-pipelines get svc tekton-pipelines-controller -o yaml spec: ports - name: []
+      path: /metrics # 메트릭 엔드포인트 경로
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: tekton-pipelines-webhook-monitor
+  namespace: tekton-pipelines
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: webhook
+      app.kubernetes.io/part-of: tekton-pipelines
+  namespaceSelector:
+    matchNames:
+      - tekton-pipelines
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: tekton-triggers-controller-monitor
+  namespace: tekton-pipelines
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/part-of: tekton-triggers
+  namespaceSelector:
+    matchNames:
+      - tekton-pipelines
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 30s
+# service monitor 참고 :
+# https://nangman14.tistory.com/75#3.%20Prometheus%20ServiceMonitor%20%EC%83%9D%EC%84%B1-1
