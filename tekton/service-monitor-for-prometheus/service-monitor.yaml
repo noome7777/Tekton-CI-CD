@@ -59,3 +59,4 @@ spec:
       interval: 30s
 # service monitor 참고 :
 # https://nangman14.tistory.com/75#3.%20Prometheus%20ServiceMonitor%20%EC%83%9D%EC%84%B1-1
+# https://blog.omoknooni.me/170
