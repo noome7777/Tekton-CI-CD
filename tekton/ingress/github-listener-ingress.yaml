@@ -13,7 +13,8 @@ spec:
           - path: / 
             pathType: Prefix 
             backend: 
-              service: 
+              service:
                 name: el-github-listener 
                 port: 
                   number: 8080
+#   ingress 는 이전 이후에 사용 (로컬에서는 post curl + payload.json 으로 사용)

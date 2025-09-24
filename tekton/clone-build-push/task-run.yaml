@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: kaniko-test-run
+spec:
+  taskRef:
+    name: build-and-push-image
+  params:
+    - name: image-name
+      value: "docker.io/chulsune123/vtwsaas"
+    - name: image-tag
+      value: "test"
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-config
+      secret:
+        secretName: regcred
+# 사용 안함 ->
+#
+#  Pipeline로 돌릴 때는 TaskRun을 따로 만들 필요 없습니다.
+#  PipelineRun 하나가 올라가면, Tekton이 각 Task마다 TaskRun을 자동으로 생성해서 실행해요.
+#
+#  정리
+#  단일 Task만 따로 돌리고 싶을 때 → Task + TaskRun (혹은 tkn task start ...)
+#  여러 Task를 순서대로(클론→빌드→푸시) 묶어 돌릴 때 → Pipeline + PipelineRun
+#  이 경우 TaskRun YAML은 작성하지 않습니다.
+#  컨트롤러가 clone-task, build-task, image-task용 TaskRun들을 자동 생성합니다. (UI에서 보이는 그 이름들이 자동 생성된 TaskRun이에요)
+#
+#  <선택지 요약>
+#  1. 권장(지금 너가 쓰는 방식)
+#  Task들 정의 → Pipeline에서 묶기 → PipelineRun으로 실행
+#  ✔️ TaskRun 별도 작성 불필요
+#
+#  2. 디버깅/단위 실행
+#  특정 Task만 시험: TaskRun 작성 or tkn task start build-and-push-image ...
+#  이땐(파이프라인(Pipeline)으로 묶지 않고 TaskRun만 따로 돌릴 때) 같은 PVC/워크스페이스를 직접 바인딩해줘야 함 --> 서로 다른 TaskRun 사이에 소스를 전달하려고 같은 PVC를 같은 워크스페이스 이름으로 바인딩
+#
+#  3. 아예 Task 리소스 없이 빠르게
+#  Pipeline 안에 taskSpec(inline)으로 스텝을 바로 넣고 PipelineRun만 실행
+#  리소스 수 줄이고 빠르게 실험할 때 유용

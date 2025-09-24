@@ -25,7 +25,7 @@ spec:
           - name: commit-sha 
             value: $(tt.params.commit-sha) 
           - name: image-name
-            value: "docker.io/gtno1chun/vtwsaas"
+            value: "docker.io/areumLee1360/vtwsaas"
           - name: image-tag
             value: "latest" 
         workspaces: 
@@ -43,5 +43,4 @@ spec:
           - name: docker-config 
             secret:
               secretName: regcred 
-              
-        
+# 현재 올라가있는 pipeline-vtwsaas-portal

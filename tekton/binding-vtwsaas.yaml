@@ -11,4 +11,4 @@ spec:
       value: $(body.ref) 
     - name: commit-sha 
       value: $(body.after) 
- 
+# payload.json의 body를 TriggerBinding을 통해 param으로 받아 변수 설정해주기
