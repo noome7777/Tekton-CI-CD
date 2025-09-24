@@ -4,11 +4,26 @@ https://nangman14.tistory.com/85
 
 
 
-# Tekton 
-1. install 
+# 환경설정
 ```
+minikube 설치 
+$ minikube start --kubernetes-version v1.33.1
+```
+
+
+# Tekton
+1. install
+```
+### Tekton 파이프라인 
 $ kubectl apply --filename \
 https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+
+
+### Triggers 설치 
+kubectl apply --filename \
+https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+kubectl apply --filename \
+https://storage.googleapis.com/tekton-releases/triggers/latest/interceptors.yaml
 ```
 
 2. install tkn CLI
@@ -16,8 +31,10 @@ https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 $ brew install tektoncd-cli
 ```
 
-3. SSH 개인 키 파일이 "~/.ssh/id_rsa"에 있다고 가정
+3. SSH 개인 키 파일이
 ```
+"~/.ssh/id_rsa"에 있다고 가정
+
 $ kubectl create secret generic ssh-key-secret --from-file=ssh-key=~/.ssh/id_rsa
 ```
 
@@ -97,11 +114,22 @@ spec:
 kubectl create secret generic github-webhook-secret \
   --from-literal=secretToken="MY_SUPER_SECRET" \
   -n default
+
+### github setting 
+GitHub Repository → Settings → Webhooks → Payload URL에 http(s)://<EXTERNAL_URL>/ 입력
+Content type: application/json
+Secret도 설정 가능 (권장) -> MY_SUPER_SECRET 
 ```
 
-7. 로컬환경 테스트 
+7. minikube 공인IP가 없어 로컬환경 테스트
 ```
-# payload.json
+## eventlistener 아래 변경 
+      interceptors: []
+``` 
+```
+
+# payload.json 생성
+cat > payload.json <<EOF
 {
   "ref": "refs/heads/main",
   "after": "0000000000000000000000000000000000000000",
@@ -114,6 +142,7 @@ kubectl create secret generic github-webhook-secret \
     "name": "test-user"
   }
 }
+EOF
 ```
 ```
 $ kubectl port-forward svc/el-github-listener 8080:8080 
