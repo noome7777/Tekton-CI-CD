@@ -177,3 +177,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
+
+---
+- 생성한 secret 모음
+![img.png](../image/img.png)
+- 생성한 serviceaccount 모음
+![img_2.png](../image/img_2.png)

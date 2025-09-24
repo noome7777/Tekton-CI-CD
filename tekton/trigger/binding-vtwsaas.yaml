@@ -1,0 +1,16 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: github-binding
+  namespace: default
+spec:
+  params:
+    - name: repo-url
+      # SSH를 쓸거면 ssh_url (repo-url) , HTTPS를 쓸거면 clone_url
+      value: $(body.repository.repo-url)
+    - name: branch-name
+      value: $(body.ref)          # ex) refs/heads/main
+    # ──────────────────────────────────────────────────
+    # ↓↓↓ 지금은 빼자: 파이프라인에 이 파라미터가 없음
+    # - name: commit-sha
+    #   value: $(body.after)

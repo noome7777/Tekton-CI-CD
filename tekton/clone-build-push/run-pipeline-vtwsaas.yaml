@@ -35,3 +35,4 @@ spec:
         items:
           - key: .dockerconfigjson
             path: config.json
+# 이건 pipeline 수동 실행할때 사용하기 !

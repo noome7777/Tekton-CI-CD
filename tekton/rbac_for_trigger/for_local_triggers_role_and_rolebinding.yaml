@@ -1,0 +1,28 @@
+# triggers-create-pr.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: triggers-create-pr
+  namespace: default
+rules:
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns", "taskruns"]
+    verbs: ["create", "get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: triggers-create-pr-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: tekton-triggers-sa          # EventListener가 쓰는 SA
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: triggers-create-pr
+
+#  트리거(EventListener)가 파이프라인런을 “만들려면” RBAC 권한이 꼭 필요함.
+#  RBAC을 “지운다”로 해결되는 문제가 아니에요(클러스터가 RBAC 모드로 돌아가면 기본이 거부(deny) 입니다). 권한을 안 주면 EL은 202를 주더라도 실제 PipelineRun 생성 단계에서 막힘

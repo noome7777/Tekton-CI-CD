@@ -19,3 +19,7 @@ roleRef:
   kind: ClusterRole
   name: tekton-triggers-pipelinerun
   apiGroup: rbac.authorization.k8s.io
+
+
+#  트리거(EventListener)가 파이프라인런을 “만들려면” RBAC 권한이 꼭 필요함.
+#  RBAC을 “지운다”로 해결되는 문제가 아니에요(클러스터가 RBAC 모드로 돌아가면 기본이 거부(deny) 입니다). 권한을 안 주면 EL은 202를 주더라도 실제 PipelineRun 생성 단계에서 막힘
