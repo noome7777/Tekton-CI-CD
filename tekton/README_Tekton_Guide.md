@@ -35,8 +35,16 @@ $ brew install tektoncd-cli
 ```
 "~/.ssh/id_rsa"에 있다고 가정
 
+없는 경우에는 다음과 같은 명령어로 생성하기 
+ssh-keygen -t rsa -b 4096 -C "lee990103@naver.com"
+
 $ kubectl create secret generic ssh-key-secret --from-file=ssh-key=~/.ssh/id_rsa
+또는
+$ kubectl create secret generic ssh-key-secret \
+  --from-file=ssh-key=./id_rsa
 ```
+※ github에 cat ~/.ssh/id_rsa.pub 공개키를 등록해주어야 사용 가능
+![img_3.png](../image/img_3.png)
 
 4. maven error 발생 
 ```
@@ -63,7 +71,7 @@ kubectl create secret docker-registry regcred \
   --docker-username=YOUR_DOCKERHUB_USERNAME \
   --docker-password=YOUR_DOCKERHUB_PASSWORD \
   --docker-email=YOUR_EMAIL
-  ```
+```
 
 ```
 # service account 
@@ -120,6 +128,8 @@ GitHub Repository → Settings → Webhooks → Payload URL에 http(s)://<EXTERN
 Content type: application/json
 Secret도 설정 가능 (권장) -> MY_SUPER_SECRET 
 ```
+![img_4.png](../image/img_4.png)
+※ github-webhook-secret, ssh-key-secret 두개를 Github에 등록 해준 상태
 
 7. minikube 공인IP가 없어 로컬환경 테스트
 ```
@@ -148,10 +158,10 @@ EOF
 $ kubectl port-forward svc/el-github-listener 8080:8080 
 ```
 ```
-curl -X POST http://localhost:8080/ \
--H "Content-Type: application/json" \
--H "X-GitHub-Event: push" \
--d @payload.json
+curl -v --http1.1 -X POST http://localhost:8080/ \
+-H 'Content-Type: application/json' \
+-H 'X-GitHub-Event: push' \
+--data-binary @payload.json
 ```
 ```
 apiVersion: rbac.authorization.k8s.io/v1

@@ -8,16 +8,17 @@ spec:
   serviceAccountName: tekton-sa 
   params:
     - name: repo-url
-      value: "git@github.com:areumLee1360/vtw-saas.git"
+      value: "git@github.com:noome7777/Tekton-CI-CD.git"
     - name: branch-name
       value: "main"
     - name: maven-goal 
       value: "package"
     - name: image-name 
-      value: "docker.io/chulsune123/vtwsaas"
+      value: "docker.io/chulsune123/tekton-ci-cd"
     - name: image-tag 
       value: "latest" 
   workspaces:
+#   추후에는, onnaas-pvc 설정해주면 될듯함
     - name: shared-workspace 
       volumeClaimTemplate:
         spec:
@@ -35,4 +36,4 @@ spec:
         items:
           - key: .dockerconfigjson
             path: config.json
-# 이건 pipeline 수동 실행할때 사용하기 !
+# 이건 pipeline 수동 실행할때 사용하기 ! --> template-vtwsaas.yaml 이랑 비슷함 (trigger로 자동 실행하는 거라 비슷)

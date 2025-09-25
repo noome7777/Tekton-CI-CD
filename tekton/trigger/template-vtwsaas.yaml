@@ -24,16 +24,18 @@ spec:
             value: $(tt.params.branch-name)
           # - name: commit-sha         # 제거
           - name: image-name
-            value: "docker.io/chulsune123/vtwsaas"
+            value: "docker.io/chulsune123/tekton-ci-cd"
           - name: image-tag
             value: "latest"
         workspaces:
           - name: shared-workspace
             volumeClaimTemplate:
               spec:
-                accessModes: [ReadWriteOnce]
+                accessModes:
+                  - ReadWriteOnce
                 resources:
-                  requests: { storage: 1Gi }
+                  requests:
+                    storage: 1Gi
           - name: shared-ssh-dir
             secret:
               secretName: ssh-key-secret
