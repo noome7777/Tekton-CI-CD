@@ -1,0 +1,73 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: gradle-pipeline-vtwsaas-portal
+spec:
+  params:
+    - name: repo-url
+      type: string
+      description: The URL of the git repository to clone.
+    - name: branch-name
+      type: string
+      description: The git branch to checkout.
+      default: "main"
+    - name: gradle-task
+      type: string
+      default: "build"
+      description: Gradle task to run
+    - name: gradle-args
+      type : string
+      description: Extra args (e.g. -x test --stacktrace)
+      default: "--build-cache"
+    - name: image-name 
+      type: string 
+      description: The name of the image to build and push 
+    - name: image-tag
+      type: string 
+      default: "latest" 
+  workspaces:
+    - name: shared-workspace
+    - name: shared-ssh-dir
+    - name: docker-config     # Docker 레지스트리 인증을 위한 워크스페이스
+  tasks:
+    - name: clone-task
+      taskRef:
+        name: git-clone-ssh-gradle
+      params:
+        - name: repo-url
+          value: "$(params.repo-url)"
+        - name: branch-name
+          value: "$(params.branch-name)"
+      workspaces:
+        - name: source
+          workspace: shared-workspace 
+        - name: ssh-dir
+          workspace: shared-ssh-dir
+    - name: build-task
+      taskRef:  
+        name: gradle-build
+      runAfter: 
+        - clone-task 
+      params:
+        - name: gradle-task
+          value: "$(params.gradle-task)"
+        - name: gradle-args
+          value: "$(params.gradle-args)"
+      workspaces:
+        - name: source 
+          workspace: shared-workspace 
+    - name: image-task  
+      taskRef: 
+        name: build-and-push-image-gradle
+      runAfter:
+        - build-task 
+      params:
+        - name: image-name 
+          value: "$(params.image-name)"
+        - name: image-tag  
+          value: "$(params.image-tag)" 
+      workspaces: 
+        - name: source 
+          workspace: shared-workspace 
+        - name: docker-config 
+          workspace: docker-config

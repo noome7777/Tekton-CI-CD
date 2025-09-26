@@ -40,8 +40,7 @@ ssh-keygen -t rsa -b 4096 -C "lee990103@naver.com"
 
 $ kubectl create secret generic ssh-key-secret --from-file=ssh-key=~/.ssh/id_rsa
 또는
-$ kubectl create secret generic ssh-key-secret \
-  --from-file=ssh-key=./id_rsa
+$ kubectl create secret generic ssh-key-secret --from-file=ssh-key=./id_rsa
 ```
 ※ github에 cat ~/.ssh/id_rsa.pub 공개키를 등록해주어야 사용 가능
 ![img_3.png](../image/img_3.png)
