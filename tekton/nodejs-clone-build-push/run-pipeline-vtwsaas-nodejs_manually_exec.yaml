@@ -1,42 +1,44 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: vtw-clone-gradlebuild-pushimage-run
+  name: vtw-nodejs-clone-build-push-run
   namespace: default
 spec:
   pipelineRef:
-    name: gradle-pipeline-vtwsaas-portal
-  serviceAccountName: tekton-sa 
+    name: nodejs-pipeline-vtwsaas-portal
+  serviceAccountName: tekton-sa
   params:
     - name: repo-url
       value: "git@github.com:noome7777/Tekton-CI-CD.git"
     - name: branch-name
       value: "main"
-    - name: gradle-task
-      value: "build"
-    - name: gradle-args
-      value: "--build-cache"
-    - name: image-name 
+    - name: project-path
+      value: "gs-nodejs/servers/express/api-with-express-and-handlebars"
+    - name: build-command
+      value: ""                        # CHANGED: 장기 실행 방지(빈 값으로)
+    - name: image-name
       value: "docker.io/chulsune123/tekton-ci-cd"
-    - name: image-tag 
-      value: "latest" 
+    - name: image-tag
+      value: "nodejs" #latest로 수정 해도 됨!
   workspaces:
-#   추후에는, onnaas-pvc 설정해주면 될듯함
     - name: shared-workspace
       volumeClaimTemplate:
         spec:
-          accessModes:
-            - ReadWriteOnce
+          accessModes: ["ReadWriteOnce"]
           resources:
             requests:
               storage: 1Gi
     - name: shared-ssh-dir
       secret:
         secretName: ssh-key-secret
-    - name: docker-config 
-      secret: 
+        items:
+          - key: ssh-key
+            path: ssh-key
+    - name: docker-config
+      secret:
         secretName: regcred
         items:
           - key: .dockerconfigjson
             path: config.json
-# 이건 pipeline 수동 실행할때 사용하기 ! --> template-vtwsaas.yaml 이랑 비슷함 (trigger로 자동 실행하는 거라 비슷)
+    - name: node-cache
+      emptyDir: {}

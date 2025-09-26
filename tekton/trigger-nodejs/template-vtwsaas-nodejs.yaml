@@ -1,38 +1,39 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: github-template-gradle
+  name: github-template-nodejs
   namespace: default
 spec:
   params:
     - name: repo-url
     - name: branch-name
-    # - name: commit-sha     # 제거
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        generateName: github-pipeline-run-gradle
+        generateName: github-pipeline-run-nodejs-
       spec:
         pipelineRef:
-          name: gradle-pipeline-vtwsaas-portal
+          name: nodejs-pipeline-vtwsaas-portal
         serviceAccountName: tekton-sa
         params:
           - name: repo-url
             value: $(tt.params.repo-url)
           - name: branch-name
             value: $(tt.params.branch-name)
-          # - name: commit-sha         # 제거
+          - name: project-path
+            value: "gs-nodejs/servers/express/api-with-express-and-handlebars"
+          - name: build-command
+            value: ""                       # 빌드 단계 장기 실행 방지 (npm start 금지)
           - name: image-name
             value: "docker.io/chulsune123/tekton-ci-cd"
           - name: image-tag
-            value: "latest"
+            value: "nodejs"
         workspaces:
           - name: shared-workspace
             volumeClaimTemplate:
               spec:
-                accessModes:
-                  - ReadWriteOnce
+                accessModes: ["ReadWriteOnce"]
                 resources:
                   requests:
                     storage: 1Gi
@@ -48,3 +49,5 @@ spec:
               items:
                 - key: .dockerconfigjson
                   path: config.json
+          - name: node-cache
+            emptyDir: {}                     # NPM 캐시용 (선택)

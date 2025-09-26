@@ -1,0 +1,59 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: nodejs-build
+spec:
+  params:
+    - name: project-path
+      type: string
+      default: "gs-nodejs/servers/express/api-with-express-and-handlebars"
+    - name: build-command
+      type: string
+      default: ""                         # CHANGED: 기본값을 빈 문자열로. (서버 기동 방지)
+  workspaces:
+    - name: source
+    - name: node-cache
+      optional: true
+  steps:
+    - name: build
+      image: node:18-alpine
+      workingDir: $(workspaces.source.path)/$(params.project-path)
+      script: |
+        #!/bin/sh
+        set -eu
+
+        # 캐시 사용
+        if [ -n "$(workspaces.node-cache.path)" ] && [ -d "$(workspaces.node-cache.path)" ]; then
+          export NPM_CONFIG_CACHE="$(workspaces.node-cache.path)"
+          echo "[INFO] Using NPM cache: $NPM_CONFIG_CACHE"
+        fi
+
+        # 의존성 설치: lockfile 있으면 ci, 없으면 install
+        if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+          echo "[INFO] Running: npm ci"
+          npm ci
+        else
+          echo "[INFO] No lockfile, running: npm install"
+          npm install
+        fi
+
+        echo "[INFO] package.json scripts:"; npm run || true
+
+        # CHANGED: 'build' 스크립트가 있을 때만 실행. 'npm start' 같은 장기 실행 금지.
+        if npm run -s | grep -qE '^  build(\s|$)'; then
+          echo "[INFO] Detected build script; running: npm run build"
+          npm run build
+        else
+          echo "[INFO] No build script; skipping build step."
+        fi
+
+        # CHANGED: 사용자가 build-command를 명시한 경우에만 실행하되, 'npm start'는 차단
+        if [ -n "$(params.build-command)" ]; then
+          case "$(params.build-command)" in
+            *"npm start"*|*"node index"*|*"node server.js"*)
+              echo "[WARN] build-command looks like a long-running server start; skipping."; ;;
+            *)
+              echo "[INFO] Running custom build-command: $(params.build-command)"
+              sh -lc "$(params.build-command)";;
+          esac
+        fi
