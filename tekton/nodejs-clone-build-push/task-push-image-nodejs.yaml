@@ -1,0 +1,50 @@
+apiVersion: tekton.dev/v1beta1 
+kind: Task 
+metadata: 
+  name: build-and-push-image-gradle
+spec:
+  params:
+    - name: image-name 
+      type: string 
+      description: The name of the image to build and push 
+    - name: image-tag
+      type: string 
+      description: The tag for the image (e.g., latest, v1.0). 
+      default: "latest"
+    - name: dockerfile-path 
+      type: string 
+      default: "gs-spring-boot/complete"  
+  workspaces:
+    - name: source
+      description: Source + Dockerfile
+    - name: docker-config
+      description: Docker registry credentials (regcred mapped as config.json)
+  steps:
+    # (선택) 누구로 로그인되어 있는지 "아이디만" 확인
+    - name: whoami-in-config
+      image: alpine:3.20
+      env:
+        - name: DOCKER_CONFIG
+          value: $(workspaces.docker-config.path)
+      script: |
+        #!/bin/sh
+        set -eu
+        CFG="$DOCKER_CONFIG/config.json"
+        if [ ! -f "$CFG" ]; then
+          echo "Docker user in config: MISSING_CONFIG"
+          exit 1
+        fi
+        USER_IN_CFG=$(sed -n 's/.*"auth"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$CFG" \
+          | head -n1 | base64 -d 2>/dev/null | cut -d: -f1 || true)
+        echo "Docker user in config: ${USER_IN_CFG:-UNKNOWN}"
+
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:latest
+      env:
+        - name: DOCKER_CONFIG
+          value: $(workspaces.docker-config.path)   # ← 워크스페이스를 그대로 사용
+      args:
+        - --dockerfile=$(workspaces.source.path)/$(params.dockerfile-path)/Dockerfile
+        - --context=$(workspaces.source.path)/$(params.dockerfile-path)
+        - --destination=$(params.image-name):$(params.image-tag)
+        # - --verbosity=debug

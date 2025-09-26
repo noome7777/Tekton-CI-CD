@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1 
+kind: Ingress 
+metadata: 
+  name: github-listener-ingress-nodejs
+  namespace: default 
+  annotations: 
+    nginx.ingress.kubernetes.io/rewrite-target: / 
+spec: 
+  rules:
+    - host: tekton-listener.local  
+      http: 
+        paths:
+          - path: / 
+            pathType: Prefix 
+            backend: 
+              service:
+                name: el-github-listener-nodejs
+                port: 
+                  number: 8070
+
+# ingress 는 이전 이후에 사용 (로컬에서는 post curl + payload.json 으로 사용)
+
+# 1. kubectl -n default port-forward svc/el-github-listener-gradle 8090:8080
+
+
+# 2. Curl 명렁어 :
+# curl -v --http1.1 -X POST http://localhost:8090/ \
+# -H 'Content-Type: application/json' -H 'X-GitHub-Event: push' \
+# --data-binary @payload.json

@@ -1,0 +1,61 @@
+# apiVersion: triggers.tekton.dev/v1beta1 
+# kind: EventListener 
+# metadata:
+#   name: github-listener 
+# spec: 
+#   serviceAccountName: tekton-triggers-sa    
+#   triggers:
+#     - name: github-push 
+#       interceptors:
+#         - ref: 
+#             name: github 
+#           params: 
+#             - name: secretRef 
+#               value: 
+#                 secretName: github-webhook-secret 
+#                 secretKey: secretToken 
+#             - name: eventTypes 
+#               value: ["push"] 
+#       bindings:
+#         - ref: github-binding 
+#       template:
+#         ref: github-template
+
+
+
+#  1. EventListener가 외부에서 발생한 이벤트(웹훅, HTTP 요청 등)를 수신
+#
+#  2. 이 이벤트가 하나 이상의 Trigger에 전달됨
+#
+#  3. 각 Trigger는 (선택적으로) Interceptor를 통해 이벤트를 검사 또는 변환함
+#
+#  4. TriggerBinding을 사용해서 이벤트의 payload에서 필요한 데이터를 추출하고, TriggerTemplate의 파라미터로 매핑
+#
+#  5. TriggerTemplate을 기반으로 TaskRun 또는 PipelineRun 등의 리소스를 생성하여 실행
+
+apiVersion: triggers.tekton.dev/v1beta1 
+kind: EventListener 
+metadata: 
+  name: github-listener-nodejs
+  namespace: default  
+spec: 
+  serviceAccountName: tekton-triggers-sa 
+  triggers:
+    - bindings: 
+        - ref: github-binding-nodejs
+      template:
+        ref: github-template-nodejs
+
+      # 로컬 테스트 일 경우 아래 임시 주석 (interceptor 은 로컬에서는 사용 안해도 되고, 이전 할 때는 시크릿도 생성 + interceptor 필요함)
+      interceptors: []
+      # interceptors: 
+      #   - ref: 
+      #       name: github 
+      #     params: 
+      #       - name: secretRef 
+      #         value: 
+      #           secretName: github-webhook-secret 
+      #           secretKey: secretToken 
+      #       - name: eventTypes 
+      #         value: 
+      #           - push 
